@@ -17,6 +17,8 @@ import SelectNode from "./components/nodes/SelectNode";
 import AddPanel from "./components/panels/AddPanel";
 import EditPanel from "./components/panels/EditPanel";
 
+const nodeTypes = { inputNode: InputNode, selectNode: SelectNode };
+
 const initialNodes = [
   {
     id: "1",
@@ -46,22 +48,34 @@ const initialNodes = [
   },
 ];
 
-const nodeTypes = { inputNode: InputNode, selectNode: SelectNode };
-
 function Flow() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [selectedNode, setSelectedNode] = useState(null);
+  const [selectedNodeId, setSelectedNodeId] = useState(null);
 
   const onConnect = useCallback(
     (connection) => {
       setEdges((eds) => [
         ...eds,
-        { ...connection, id: `e${connection.source}-${connection.target}` },
+        {
+          ...connection,
+          id: `e${connection.source}-${connection.target}`,
+          type: "default",
+          animated: true,
+          style: { stroke: "#555" },
+        },
       ]);
     },
     [setEdges]
   );
+
+  const onNodeClick = useCallback((event, node) => {
+    setSelectedNodeId(node.id);
+  }, []);
+
+  const onPanelClose = useCallback(() => {
+    setSelectedNodeId(null);
+  }, []);
 
   const onAddNode = useCallback(
     (data) => {
@@ -85,7 +99,9 @@ function Flow() {
             id: `e${previousNode.id}-${newNode.id}`,
             source: previousNode.id,
             target: newNode.id,
-            type: "smoothstep",
+            type: "custom",
+            animated: true,
+            style: { stroke: "#555" },
           },
         ]);
       }
@@ -112,12 +128,8 @@ function Flow() {
     },
     [setNodes]
   );
-  const onNodeClick = useCallback((event, node) => {
-    setSelectedNode(node);
-  }, []);
-  const onPanelClose = useCallback(() => {
-    setSelectedNode(null);
-  }, []);
+
+  const selectedNode = nodes.find((node) => node.id === selectedNodeId);
 
   return (
     <ReactFlow
@@ -125,22 +137,22 @@ function Flow() {
       edges={edges}
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
-      onNodeClick={onNodeClick}
       onConnect={onConnect}
+      onNodeClick={onNodeClick}
+      onEdgeClick={(event, edge) => {
+        setEdges((eds) => eds.filter((ed) => ed.id !== edge.id));
+      }}
       nodeTypes={nodeTypes}
       fitView
     >
       <Panel position="top-left">
         <AddPanel onAddNode={onAddNode} />
       </Panel>
-      <Panel position="top-left">
-        <EditPanel
-          nodes={nodes}
-          updateNode={updateNodeData}
-          selectedNode={selectedNode}
-          onPanelClose={onPanelClose}
-        />
-      </Panel>
+      <EditPanel
+        selectedNode={selectedNode}
+        onClose={onPanelClose}
+        updateNode={updateNodeData}
+      />
       <Controls />
       <MiniMap />
       <Background />
