@@ -80,7 +80,7 @@ function EditPanel({ selectedNode, updateNode, onPanelClose }) {
         />
         {errors.label && <p className="text-red-500">{errors.label.message}</p>}
 
-        {selectedNode && (
+        {selectedNode.data.options && (
           <div className="mb-4">
             <label className="block mb-2">Options</label>
             {options.map((option, index) => (
