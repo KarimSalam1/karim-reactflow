@@ -59,7 +59,7 @@ function EditPanel({ selectedNode, updateNode, onPanelClose }) {
   };
 
   return (
-    <div className="w-64 bg-white p-4 fixed right-0 top-0 h-full shadow-lg">
+    <div className="w-64 bg-white p-4 fixed right-0 top-0 h-full shadow-lg z-50">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-bold">Edit Node</h2>
         <button
@@ -80,7 +80,7 @@ function EditPanel({ selectedNode, updateNode, onPanelClose }) {
         />
         {errors.label && <p className="text-red-500">{errors.label.message}</p>}
 
-        {selectedNode.data.options && (
+        {selectedNode && (
           <div className="mb-4">
             <label className="block mb-2">Options</label>
             {options.map((option, index) => (
